@@ -36,3 +36,13 @@
     <div class="foot"><button type="button" class="btn" onclick="this.closest('dialog').close()">Batal</button><button class="btn pri">Simpan member</button></div>
   </form>
 </dialog>
+<dialog id="mEditMember">
+  <form method="post">
+    <h3>Edit data member</h3>
+    <?php hid('update_member', '?page=members'); ?>
+    <input type="hidden" name="member_id" id="editMemberId">
+    <label>Nama member</label><input name="name" id="editMemberName" maxlength="100" required>
+    <label>No. telepon <em>(opsional)</em></label><input name="phone" id="editMemberPhone" maxlength="30" inputmode="tel">
+    <div class="foot"><button type="button" class="btn" onclick="this.closest('dialog').close()">Batal</button><button class="btn pri">Simpan perubahan</button></div>
+  </form>
+</dialog>

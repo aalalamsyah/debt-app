@@ -6,6 +6,19 @@ function rp(int|float $n): string { return 'Rp ' . number_format((float)$n, 0, '
 function tgl(string $ts): string { return date('d/m/Y H:i', strtotime($ts)); }
 function tglDate(string $d): string { return date('d/m/Y', strtotime($d)); }
 
+/** Format tanggal dengan nama hari dan bulan dalam Bahasa Indonesia. */
+function hariTanggal(string $value, bool $withTime = false): string
+{
+    $timestamp = strtotime($value);
+    if ($timestamp === false) return $value;
+
+    $hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+    $bulan = [1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+    $result = $hari[(int)date('w', $timestamp)] . ', ' . (int)date('j', $timestamp) . ' ' . $bulan[(int)date('n', $timestamp)] . ' ' . date('Y', $timestamp);
+
+    return $withTime ? $result . ' · ' . date('H:i', $timestamp) : $result;
+}
+
 //tgl dengan jam
 // function tglJam(string $ts): string { return date('d/m/Y H:i', strtotime($ts)); }
 

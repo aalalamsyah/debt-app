@@ -22,6 +22,20 @@ function handlePost(DebtRepository $repo): void
         go($back, "Member \"$name\" ditambahkan.");
     }
 
+    if ($act === 'update_member') {
+        $memberId = (int)($_POST['member_id'] ?? 0);
+        $name = trim((string)($_POST['name'] ?? ''));
+        $phone = trim((string)($_POST['phone'] ?? ''));
+        if ($memberId <= 0) go($back, 'Member tidak valid.', 'err');
+        if ($name === '') go($back, 'Nama member wajib diisi.', 'err');
+        if (mb_strlen($name) > 100 || mb_strlen($phone) > 30) go($back, 'Nama maksimal 100 karakter dan nomor HP maksimal 30 karakter.', 'err');
+        if (!$repo->updateMember($memberId, $name, $phone !== '' ? $phone : null)) {
+            // rowCount dapat 0 jika nilai tidak berubah; pastikan member masih ada.
+            if (!$repo->findMember($memberId)) go($back, 'Member tidak ditemukan.', 'err');
+        }
+        go($back, 'Data member berhasil diperbarui.');
+    }
+
     if ($act === 'add_debt' || $act === 'add_payment') {
         if ($mid <= 0)    go($back, 'Pilih member terlebih dahulu.', 'err');
         if ($amount <= 0) go($back, 'Nominal harus lebih dari 0.', 'err');
