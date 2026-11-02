@@ -12,7 +12,7 @@ final class DashboardRepository
         $sql = <<<'SQL'
             WITH debt_period AS (
                 SELECT COALESCE(SUM(amount), 0) AS total
-                FROM debts WHERE debt_date >= CAST(:debt_from AS date) AND debt_date <= CAST(:debt_to AS date)
+                FROM debts WHERE cancelled_at IS NULL AND debt_date >= CAST(:debt_from AS date) AND debt_date <= CAST(:debt_to AS date)
             ), payment_period AS (
                 SELECT COALESCE(SUM(amount), 0) AS total
                 FROM payments
@@ -21,7 +21,7 @@ final class DashboardRepository
                   AND cancelled_at IS NULL
             ), debt_until AS (
                 SELECT member_id, SUM(amount) AS total
-                FROM debts WHERE debt_date <= CAST(:balance_debt_to AS date)
+                FROM debts WHERE cancelled_at IS NULL AND debt_date <= CAST(:balance_debt_to AS date)
                 GROUP BY member_id
             ), payment_until AS (
                 SELECT member_id, SUM(amount) AS total
@@ -64,7 +64,7 @@ final class DashboardRepository
                     SELECT generate_series(CAST(:cal_from AS date), CAST(:cal_to AS date), interval '1 day')::date AS period
                 ), d AS (
                     SELECT debt_date AS period, SUM(amount) AS total FROM debts
-                    WHERE debt_date >= CAST(:debt_from AS date) AND debt_date <= CAST(:debt_to AS date)
+                    WHERE cancelled_at IS NULL AND debt_date >= CAST(:debt_from AS date) AND debt_date <= CAST(:debt_to AS date)
                     GROUP BY debt_date
                 ), p AS (
                     SELECT created_at::date AS period, SUM(amount) AS total FROM payments
@@ -110,7 +110,7 @@ final class DashboardRepository
         $sql = <<<'SQL'
             WITH d AS (
                 SELECT member_id, SUM(amount) AS total FROM debts
-                WHERE debt_date <= CAST(:debt_to AS date) GROUP BY member_id
+                WHERE cancelled_at IS NULL AND debt_date <= CAST(:debt_to AS date) GROUP BY member_id
             ), p AS (
                 SELECT member_id, SUM(amount) AS total FROM payments
                 WHERE created_at::date <= CAST(:payment_to AS date)
@@ -138,7 +138,7 @@ final class DashboardRepository
         $sql = <<<'SQL'
             SELECT * FROM (
                 SELECT d.created_at AS happened_at, 'debt' AS kind, m.id AS member_id,
-                       m.name AS member_name, d.amount, d.note, d.recorded_by, NULL::timestamptz AS cancelled_at
+                       m.name AS member_name, d.amount, d.note, d.recorded_by, d.cancelled_at
                 FROM debts d JOIN members m ON m.id = d.member_id
                 UNION ALL
                 SELECT p.created_at AS happened_at, 'payment' AS kind, m.id AS member_id,
