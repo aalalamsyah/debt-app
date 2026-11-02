@@ -74,7 +74,7 @@
             <footer class="app-footer"><span>Buku Hutang</span><span>Manajemen hutang sederhana</span></footer>
         </div>
     </div>
-    <?php require BASE_PATH . '/views/modals.php'; ?><script src="assets/app.js"></script><?php if (in_array($page, ['home', 'reports'], true)): ?><script src="assets/charts.js" defer></script><?php endif; ?>
+    <?php require BASE_PATH . '/views/modals.php'; ?><script src="assets/app.js"></script><?php if ($page === 'home'): ?><script>window.debtDashboardData = <?= json_encode($trend, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR) ?>;</script><script src="assets/charts.js" defer></script><?php endif; ?>
 </body>
 
 </html>
