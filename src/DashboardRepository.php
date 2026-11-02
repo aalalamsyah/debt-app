@@ -83,7 +83,7 @@ final class DashboardRepository
                     SELECT generate_series(date_trunc('month', CAST(:cal_from AS date)), date_trunc('month', CAST(:cal_to AS date)), interval '1 month')::date AS period
                 ), d AS (
                     SELECT date_trunc('month', debt_date)::date AS period, SUM(amount) AS total FROM debts
-                    WHERE debt_date >= CAST(:debt_from AS date) AND debt_date <= CAST(:debt_to AS date)
+                    WHERE cancelled_at IS NULL AND debt_date >= CAST(:debt_from AS date) AND debt_date <= CAST(:debt_to AS date)
                     GROUP BY 1
                 ), p AS (
                     SELECT date_trunc('month', created_at)::date AS period, SUM(amount) AS total FROM payments
