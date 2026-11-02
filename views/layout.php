@@ -70,7 +70,7 @@
                     <div class="user-chip"><span class="avatar">A</span><span class="user-label">Admin</span></div>
                 </div>
             </header>
-            <main class="content"><?php if ($flash): ?><div class="flash <?= $flash[0] ?>"><?= e($flash[1]) ?></div><?php endif; ?><?php require BASE_PATH . '/views/' . (in_array($page, ['members', 'member', 'debts', 'payments', 'reports'], true) ? $page : 'home') . '.php'; ?></main>
+            <main class="content"><?php if ($flash): ?><div class="toast-notice <?= $flash[0] === 'err' ? 'error' : 'success' ?>" role="status"><span class="toast-mark"><?= $flash[0] === 'err' ? '!' : '✓' ?></span><span><?= e($flash[1]) ?></span><button type="button" class="toast-close" aria-label="Tutup notifikasi">×</button></div><?php endif; ?><?php require BASE_PATH . '/views/' . (in_array($page, ['members', 'member', 'debts', 'payments', 'reports'], true) ? $page : 'home') . '.php'; ?></main>
             <footer class="app-footer"><span>Buku Hutang</span><span>Manajemen hutang sederhana</span></footer>
         </div>
     </div>
