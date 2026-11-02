@@ -10,6 +10,7 @@
         <label><span>Member</span><select name="member_id">
                 <option value="0">Semua member</option><?php foreach ($members as $m): ?><option value="<?= (int)$m['id'] ?>" <?= $listFilters['member_id'] === (int)$m['id'] ? 'selected' : '' ?>><?= e($m['name']) ?></option><?php endforeach; ?>
             </select></label>
+        <label><span>Status</span><select name="status"><option value="all" <?= $listFilters['status'] === 'all' ? 'selected' : '' ?>>Semua status</option><option value="valid" <?= $listFilters['status'] === 'valid' ? 'selected' : '' ?>>Berlaku</option><option value="cancelled" <?= $listFilters['status'] === 'cancelled' ? 'selected' : '' ?>>Dibatalkan</option></select></label>
         <label><span>Dari tanggal</span><input type="date" name="from" value="<?= e($listFilters['from']) ?>"></label><label><span>Sampai tanggal</span><input type="date" name="to" value="<?= e($listFilters['to']) ?>"></label>
         <label><span>Urutkan</span><select name="sort">
                 <option value="date" <?= $listFilters['sort'] === 'date' ? 'selected' : '' ?>>Tanggal hutang</option>
@@ -33,18 +34,19 @@
                     <th>Pencatat</th>
                     <th class="r">Nominal</th>
                     <th>Waktu dicatat</th>
-                    <!-- <th></th> -->
+                    <th>Status</th><th></th>
                 </tr>
             </thead>
             <tbody>
-                <?php foreach ($listRows as $r): ?><tr>
+                <?php foreach ($listRows as $r): $cancelled = $r['cancelled_at'] !== null; ?><tr class="<?= $cancelled ? 'cancelled' : '' ?>">
                         <td class="nowrap"><b><?= e(hariTanggal($r['debt_date'])) ?></b></td>
                         <td><a class="name" href="?page=member&id=<?= (int)$r['member_id'] ?>"><?= e($r['member_name']) ?></a><?php if ($r['phone']): ?><div class="mute member-phone"><?= e($r['phone']) ?></div><?php endif; ?></td>
                         <td><?= $r['note'] ? e($r['note']) : '<span class="mute">-</span>' ?></td>
                         <td><?= e($r['recorded_by']) ?></td>
                         <td class="r"><b><?= rp((int)$r['amount']) ?></b></td>
                         <td class="nowrap mute"><?= tgl($r['created_at']) ?></td>
-                        <!-- <td><button class="btn sm" onclick="openM('mDebt',<?= (int)$r['member_id'] ?>)">+ Hutang</button></td> -->
+                        <td><?= $cancelled ? '<span class="badge b-batal">Dibatalkan · ' . tgl($r['cancelled_at']) . '</span>' : '<span class="badge b-lunas">Berlaku</span>' ?><?php if ($cancelled && $r['cancel_reason']): ?><div class="mute"><?= e($r['cancel_reason']) ?></div><?php endif; ?></td>
+                        <td class="r"><?php if (!$cancelled): ?><form method="post"><?php hid('cancel_debt', '?page=debts'); ?><input type="hidden" name="id" value="<?= (int)$r['id'] ?>"><input type="hidden" name="reason"><button class="btn sm danger" onclick="const reason=prompt('Alasan pembatalan hutang:'); if(!reason || !reason.trim()) return false; if(!confirm('Batalkan hutang <?= rp((int)$r['amount']) ?> untuk <?= e($r['member_name']) ?>?')) return false; this.form.reason.value=reason.trim();">Batalkan</button></form><?php endif; ?></td>
                     </tr><?php endforeach; ?>
             </tbody>
         </table>
