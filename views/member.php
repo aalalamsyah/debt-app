@@ -1,4 +1,5 @@
-<?php $sisa = (int)$member['total_debt'] - (int)$member['total_paid']; ?>
+<?php $sisa = (int)$member['total_debt'] - (int)$member['total_paid'];
+$badge['dibatalkan'] = 'Dibatalkan'; ?>
 <a class="back" href="?">‹ Kembali ke rekap</a>
 <div class="bar" style="padding:0 0 18px;border:0">
   <div><h1><?= e($member['name']) ?></h1><p class="sub" style="margin:0"><?= e($member['phone'] ?: 'Tanpa nomor telepon') ?></p></div>
@@ -38,17 +39,18 @@
   <div class="card">
     <div class="bar"><h2>Rincian hutang</h2><span class="mute" style="font-size:13px">Pelunasan menutup hutang dari tanggal terlama</span></div>
     <div class="tablebox"><table>
-      <thead><tr><th>Tanggal</th><th>Keterangan</th><th>Pencatat</th><th class="r">Hutang</th><th class="r">Terbayar</th><th class="r">Sisa</th><th>Status</th></tr></thead>
+      <thead><tr><th>Tanggal</th><th>Keterangan</th><th>Pencatat</th><th class="r">Hutang</th><th class="r">Terbayar</th><th class="r">Sisa</th><th>Status</th><th></th></tr></thead>
       <tbody>
-      <?php foreach ($debts as $d): ?>
-        <tr>
+      <?php foreach ($debts as $d): $cancelledDebt = $d['cancelled_at'] !== null; ?>
+        <tr class="<?= $cancelledDebt ? 'cancelled' : '' ?>">
           <td class="nowrap"><?= tglDate($d['debt_date']) ?></td>
           <td><?= $d['note'] ? e($d['note']) : '<span class="mute">-</span>' ?></td>
           <td><?= e($d['recorded_by']) ?></td>
           <td class="r"><?= rp((int)$d['amount']) ?></td>
           <td class="r"><?= rp($d['paid']) ?></td>
           <td class="r"><b><?= rp($d['sisa']) ?></b></td>
-          <td><span class="badge b-<?= $d['status'] ?>"><?= $badge[$d['status']] ?></span></td>
+          <td><span class="badge b-<?= $d['status'] ?>"><?= $badge[$d['status']] ?></span><?php if ($cancelledDebt && $d['cancel_reason']): ?><div class="mute"><?= e($d['cancel_reason']) ?></div><?php endif; ?></td>
+          <td class="r"><?php if (!$cancelledDebt): ?><form method="post"><?php hid('cancel_debt', $back); ?><input type="hidden" name="id" value="<?= (int)$d['id'] ?>"><input type="hidden" name="reason"><button class="btn sm danger" onclick="const reason=prompt('Alasan pembatalan hutang:'); if(!reason || !reason.trim()) return false; if(!confirm('Batalkan hutang <?= rp((int)$d['amount']) ?>?')) return false; this.form.reason.value=reason.trim();">Batalkan</button></form><?php endif; ?></td>
         </tr>
       <?php endforeach; ?>
       </tbody>
