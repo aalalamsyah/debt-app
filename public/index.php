@@ -124,11 +124,11 @@ try {
         $perPage = in_array((int)($_GET['per_page'] ?? 25), [10,25,50,100], true) ? (int)($_GET['per_page'] ?? 25) : 25;
         $requested = max(1,(int)($_GET['p'] ?? 1));
         $result = $page === 'debts'
-            ? $repo->paginateDebts($listFilters['q'],$listFilters['member_id'],$listFilters['from'],$listFilters['to'],$listFilters['sort'],$listFilters['dir'],$perPage,($requested-1)*$perPage)
+            ? $repo->paginateDebts($listFilters['q'],$listFilters['member_id'],$listFilters['from'],$listFilters['to'],$listFilters['sort'],$listFilters['dir'],$perPage,($requested-1)*$perPage,$listFilters['status'])
             : $repo->paginatePayments($listFilters['q'],$listFilters['member_id'],$listFilters['from'],$listFilters['to'],$listFilters['status'],$listFilters['sort'],$listFilters['dir'],$perPage,($requested-1)*$perPage);
         $pages=max(1,(int)ceil($result['total']/$perPage)); $current=min($requested,$pages);
         if($current!==$requested) $result = $page === 'debts'
-            ? $repo->paginateDebts($listFilters['q'],$listFilters['member_id'],$listFilters['from'],$listFilters['to'],$listFilters['sort'],$listFilters['dir'],$perPage,($current-1)*$perPage)
+            ? $repo->paginateDebts($listFilters['q'],$listFilters['member_id'],$listFilters['from'],$listFilters['to'],$listFilters['sort'],$listFilters['dir'],$perPage,($current-1)*$perPage,$listFilters['status'])
             : $repo->paginatePayments($listFilters['q'],$listFilters['member_id'],$listFilters['from'],$listFilters['to'],$listFilters['status'],$listFilters['sort'],$listFilters['dir'],$perPage,($current-1)*$perPage);
         $listRows=$result['rows']; $listPagination=['page'=>$current,'per_page'=>$perPage,'total'=>$result['total'],'pages'=>$pages];
     }
