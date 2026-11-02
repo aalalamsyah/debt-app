@@ -16,7 +16,9 @@ CREATE TABLE IF NOT EXISTS debts (
     note        TEXT,
     recorded_by VARCHAR(100) NOT NULL,
     debt_date   DATE NOT NULL DEFAULT CURRENT_DATE,
-    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    cancelled_at TIMESTAMPTZ,
+    cancel_reason TEXT
 );
 
 CREATE TABLE IF NOT EXISTS payments (
@@ -37,3 +39,5 @@ ALTER TABLE debts ADD COLUMN IF NOT EXISTS debt_date DATE;
 UPDATE debts SET debt_date = created_at::date WHERE debt_date IS NULL;
 ALTER TABLE debts ALTER COLUMN debt_date SET DEFAULT CURRENT_DATE;
 ALTER TABLE debts ALTER COLUMN debt_date SET NOT NULL;
+ALTER TABLE debts ADD COLUMN IF NOT EXISTS cancelled_at TIMESTAMPTZ;
+ALTER TABLE debts ADD COLUMN IF NOT EXISTS cancel_reason TEXT;
