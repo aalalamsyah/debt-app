@@ -50,7 +50,7 @@ $badge['dibatalkan'] = 'Dibatalkan'; ?>
           <td class="r"><?= rp($d['paid']) ?></td>
           <td class="r"><b><?= rp($d['sisa']) ?></b></td>
           <td><span class="badge b-<?= $d['status'] ?>"><?= $badge[$d['status']] ?></span><?php if ($cancelledDebt && $d['cancel_reason']): ?><div class="mute"><?= e($d['cancel_reason']) ?></div><?php endif; ?></td>
-          <td class="r"><?php if (!$cancelledDebt): ?><form method="post"><?php hid('cancel_debt', $back); ?><input type="hidden" name="id" value="<?= (int)$d['id'] ?>"><input type="hidden" name="reason"><button class="btn sm danger" onclick="const reason=prompt('Alasan pembatalan hutang:'); if(!reason || !reason.trim()) return false; if(!confirm('Batalkan hutang <?= rp((int)$d['amount']) ?>?')) return false; this.form.reason.value=reason.trim();">Batalkan</button></form><?php endif; ?></td>
+          <td class="r"><?php if (!$cancelledDebt): ?><form method="post" data-cancel-debt><?php hid('cancel_debt', $back); ?><input type="hidden" name="id" value="<?= (int)$d['id'] ?>"><input type="hidden" name="reason"><button type="submit" class="btn sm danger">Batalkan</button></form><?php endif; ?></td>
         </tr>
       <?php endforeach; ?>
       </tbody>
@@ -72,7 +72,7 @@ $badge['dibatalkan'] = 'Dibatalkan'; ?>
           <td><?= $c ? '<span class="badge b-batal">Dibatalkan ' . tgl($p['cancelled_at']) . '</span>' : '<span class="badge b-lunas">Berlaku</span>' ?></td>
           <td class="r">
             <?php if (!$c): ?>
-            <form method="post" onsubmit="return confirm('Batalkan pelunasan <?= rp((int)$p['amount']) ?>? Status hutang akan dihitung ulang.')">
+            <form method="post" data-confirm="Batalkan pelunasan <?= rp((int)$p['amount']) ?>? Status hutang akan dihitung ulang.">
               <?php hid('cancel_payment', $back); ?>
               <input type="hidden" name="id" value="<?= $p['id'] ?>">
               <button class="btn sm danger">Batal lunas</button>
