@@ -46,3 +46,18 @@
     <div class="foot"><button type="button" class="btn" onclick="this.closest('dialog').close()">Batal</button><button class="btn pri">Simpan perubahan</button></div>
   </form>
 </dialog>
+
+
+<dialog id="appActionDialog" class="app-action-dialog" aria-labelledby="appActionTitle">
+  <form method="dialog" class="app-action-form">
+    <span class="app-dialog-icon" id="appActionIcon" aria-hidden="true">!</span>
+    <h3 id="appActionTitle">Konfirmasi tindakan</h3>
+    <p id="appActionMessage" class="app-dialog-message"></p>
+    <label id="appActionReasonLabel" for="appActionReason" hidden>Alasan pembatalan</label>
+    <textarea id="appActionReason" rows="3" maxlength="500" placeholder="Tuliskan alasan pembatalan..." hidden></textarea>
+    <div class="foot">
+      <button type="button" class="btn" id="appActionCancel">Kembali</button>
+      <button type="button" class="btn pri" id="appActionConfirm">Lanjutkan</button>
+    </div>
+  </form>
+</dialog>
