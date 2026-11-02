@@ -56,6 +56,7 @@ function groupDebtsByDate(array $debts): array
 {
     $g = [];
     foreach ($debts as $d) {
+        if (($d['cancelled_at'] ?? null) !== null) continue;
         $k = $d['debt_date'];
         $g[$k] ??= ['date' => $k, 'count' => 0, 'amount' => 0, 'paid' => 0, 'sisa' => 0];
         $g[$k]['count']++;
