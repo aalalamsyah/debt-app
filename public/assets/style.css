@@ -56,3 +56,20 @@ input,select,textarea{width:100%;min-height:39px;padding:9px 11px;border:1px sol
 @keyframes toast-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:600px){.app-action-form{padding:22px}.toast-notice{top:70px;right:15px}}
 @media(prefers-reduced-motion:reduce){.app-action-dialog,.toast-notice{animation:none;transition:none}}
+
+
+/* Friendly 404 page */
+.error-page{min-height:calc(100vh - 190px);display:grid;place-items:center;padding:36px 16px}
+.error-card{width:min(100%,540px);padding:42px 38px;text-align:center;border:1px solid var(--line);border-radius:22px;background:var(--surface);box-shadow:0 18px 55px #0206170d}
+.error-code{font-size:clamp(64px,12vw,94px);font-weight:800;line-height:1;letter-spacing:-7px;color:var(--primary);opacity:.16}
+.error-icon{width:62px;height:62px;display:grid;place-items:center;margin:-7px auto 20px;border-radius:19px;background:var(--primary-soft);color:var(--primary)}
+.error-icon svg{width:30px;height:30px;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.error-eyebrow{font-size:10px;font-weight:800;letter-spacing:1.25px;color:var(--primary)}
+.error-card h1{margin:10px 0 9px;font-size:clamp(21px,4vw,27px);letter-spacing:-.8px;color:var(--ink)}
+.error-card>p{max-width:390px;margin:0 auto;color:var(--mute);font-size:13px;line-height:1.75}
+.error-url{display:flex;flex-direction:column;gap:7px;margin:24px 0;padding:12px 14px;border:1px solid var(--line);border-radius:11px;background:var(--bg);text-align:left}
+.error-url span{font-size:10px;font-weight:700;color:var(--mute)}
+.error-url code{overflow-wrap:anywhere;font-size:11px;color:var(--ink)}
+.error-home-link{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:42px;padding:0 18px;text-decoration:none}
+.error-home-link svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:600px){.error-card{padding:32px 22px}.error-page{min-height:60vh}}
