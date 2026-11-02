@@ -38,7 +38,7 @@ final class DebtRepository
             COALESCE(d.total_debt, 0) AS total_debt,
             COALESCE(p.total_paid, 0) AS total_paid
             FROM members m
-            LEFT JOIN (SELECT member_id, SUM(amount) AS total_debt FROM debts GROUP BY member_id) d ON d.member_id = m.id
+            LEFT JOIN (SELECT member_id, SUM(amount) AS total_debt FROM debts WHERE cancelled_at IS NULL GROUP BY member_id) d ON d.member_id = m.id
             LEFT JOIN (SELECT member_id, SUM(amount) AS total_paid FROM payments WHERE cancelled_at IS NULL GROUP BY member_id) p ON p.member_id = m.id
             ORDER BY m.name")->fetchAll();
     }
@@ -137,7 +137,7 @@ final class DebtRepository
                        COALESCE(p.total_paid, 0) AS total_paid, d.last_debt,
                        (COALESCE(d.total_debt, 0) - COALESCE(p.total_paid, 0)) AS balance
                 FROM members m
-                LEFT JOIN (SELECT member_id, SUM(amount) AS total_debt, MAX(debt_date) AS last_debt FROM debts GROUP BY member_id) d ON d.member_id = m.id
+                LEFT JOIN (SELECT member_id, SUM(amount) AS total_debt, MAX(debt_date) AS last_debt FROM debts WHERE cancelled_at IS NULL GROUP BY member_id) d ON d.member_id = m.id
                 LEFT JOIN (SELECT member_id, SUM(amount) AS total_paid FROM payments WHERE cancelled_at IS NULL GROUP BY member_id) p ON p.member_id = m.id
                 $whereSql ORDER BY $orderBy $direction NULLS LAST, m.id ASC";
         $stmt = $this->pdo->prepare($sql); $stmt->execute($params);
