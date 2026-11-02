@@ -12,12 +12,12 @@ final class DebtRepository
     {
         $sql = "SELECT
             (SELECT COUNT(*) FROM members) AS total_members,
-            (SELECT COALESCE(SUM(amount), 0) FROM debts) AS total_debt,
+            (SELECT COALESCE(SUM(amount), 0) FROM debts WHERE cancelled_at IS NULL) AS total_debt,
             (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE cancelled_at IS NULL) AS total_paid,
             (SELECT COUNT(*) FROM (
                 SELECT m.id
                 FROM members m
-                LEFT JOIN (SELECT member_id, SUM(amount) AS total_debt FROM debts GROUP BY member_id) d ON d.member_id = m.id
+                LEFT JOIN (SELECT member_id, SUM(amount) AS total_debt FROM debts WHERE cancelled_at IS NULL GROUP BY member_id) d ON d.member_id = m.id
                 LEFT JOIN (SELECT member_id, SUM(amount) AS total_paid FROM payments WHERE cancelled_at IS NULL GROUP BY member_id) p ON p.member_id = m.id
                 WHERE COALESCE(d.total_debt, 0) - COALESCE(p.total_paid, 0) > 0
             ) debtors) AS debtors";
@@ -53,7 +53,7 @@ final class DebtRepository
             FROM members m
             LEFT JOIN (
                 SELECT member_id, SUM(amount) AS total_debt, MAX(debt_date) AS last_debt
-                FROM debts GROUP BY member_id
+                FROM debts WHERE cancelled_at IS NULL GROUP BY member_id
             ) d ON d.member_id = m.id
             LEFT JOIN (
                 SELECT member_id, SUM(amount) AS total_paid
@@ -92,7 +92,7 @@ final class DebtRepository
         }
         $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
         $baseSql = " FROM members m
-            LEFT JOIN (SELECT member_id, SUM(amount) AS total_debt, MAX(debt_date) AS last_debt FROM debts GROUP BY member_id) d ON d.member_id = m.id
+            LEFT JOIN (SELECT member_id, SUM(amount) AS total_debt, MAX(debt_date) AS last_debt FROM debts WHERE cancelled_at IS NULL GROUP BY member_id) d ON d.member_id = m.id
             LEFT JOIN (SELECT member_id, SUM(amount) AS total_paid FROM payments WHERE cancelled_at IS NULL GROUP BY member_id) p ON p.member_id = m.id
             $whereSql";
 
@@ -151,7 +151,7 @@ final class DebtRepository
             SELECT * FROM (
                 SELECT d.debt_date AS transaction_date, d.created_at, 'Hutang' AS kind,
                        m.name AS member_name, m.phone, d.amount, d.note, d.recorded_by,
-                       'Berlaku' AS status, NULL::timestamptz AS cancelled_at
+                       CASE WHEN d.cancelled_at IS NULL THEN 'Berlaku' ELSE 'Dibatalkan' END AS status, d.cancelled_at
                 FROM debts d JOIN members m ON m.id = d.member_id
                 WHERE d.debt_date >= CAST(:debt_from AS date) AND d.debt_date <= CAST(:debt_to AS date)
                 UNION ALL
@@ -170,17 +170,18 @@ final class DebtRepository
 
 
     /** Daftar hutang global dengan filter, pagination, dan urutan aman. */
-    public function paginateDebts(string $search, int $memberId, string $from, string $to, string $sort, string $dir, int $limit, int $offset): array
+    public function paginateDebts(string $search, int $memberId, string $from, string $to, string $sort, string $dir, int $limit, int $offset, string $status = 'all'): array
     {
         $columns = ['date' => 'd.debt_date', 'amount' => 'd.amount', 'member' => 'm.name', 'created' => 'd.created_at'];
         $order = $columns[$sort] ?? $columns['date']; $dir = strtoupper($dir) === 'ASC' ? 'ASC' : 'DESC';
         $where = ['d.debt_date >= CAST(:date_from AS date)', 'd.debt_date <= CAST(:date_to AS date)'];
+        if ($status === 'valid') $where[] = 'd.cancelled_at IS NULL'; elseif ($status === 'cancelled') $where[] = 'd.cancelled_at IS NOT NULL';
         $params = ['date_from' => $from, 'date_to' => $to];
         if ($memberId > 0) { $where[] = 'd.member_id = :member_id'; $params['member_id'] = $memberId; }
         if ($search !== '') { $where[] = "(m.name ILIKE :search_name OR COALESCE(m.phone, '') ILIKE :search_phone OR COALESCE(d.note, '') ILIKE :search_note)"; $v = '%' . $search . '%'; $params += ['search_name'=>$v, 'search_phone'=>$v, 'search_note'=>$v]; }
         $base = ' FROM debts d JOIN members m ON m.id = d.member_id WHERE ' . implode(' AND ', $where);
         $st = $this->pdo->prepare('SELECT COUNT(*)' . $base); $st->execute($params); $total = (int)$st->fetchColumn();
-        $sql = 'SELECT d.id, d.member_id, d.debt_date, d.created_at, d.amount, d.note, d.recorded_by, m.name AS member_name, m.phone' . $base . " ORDER BY $order $dir, d.id DESC LIMIT :lim OFFSET :off";
+        $sql = 'SELECT d.id, d.member_id, d.debt_date, d.created_at, d.amount, d.note, d.recorded_by, d.cancelled_at, d.cancel_reason, m.name AS member_name, m.phone' . $base . " ORDER BY $order $dir, d.id DESC LIMIT :lim OFFSET :off";
         $st = $this->pdo->prepare($sql); foreach ($params as $k=>$v) $st->bindValue(':'.$k, $v); $st->bindValue(':lim',$limit,PDO::PARAM_INT); $st->bindValue(':off',$offset,PDO::PARAM_INT); $st->execute();
         return ['rows'=>$st->fetchAll(), 'total'=>$total];
     }
@@ -225,6 +226,14 @@ final class DebtRepository
             ->execute([$memberId, $amount, $note, $by]);
     }
 
+    /** Batalkan transaksi hutang tanpa menghapus riwayatnya. */
+    public function cancelDebt(int $id, string $reason): bool
+    {
+        $stmt = $this->pdo->prepare('UPDATE debts SET cancelled_at = now(), cancel_reason = ? WHERE id = ? AND cancelled_at IS NULL');
+        $stmt->execute([$reason, $id]);
+        return $stmt->rowCount() > 0;
+    }
+
     /** Batal lunas: pelunasan ditandai batal (tidak dihapus), status hutang dihitung ulang. */
     public function cancelPayment(int $id): void
     {
@@ -241,7 +250,7 @@ final class DebtRepository
     public function remaining(int $memberId): int
     {
         $s = $this->pdo->prepare('SELECT
-            (SELECT COALESCE(SUM(amount), 0) FROM debts WHERE member_id = :m) -
+            (SELECT COALESCE(SUM(amount), 0) FROM debts WHERE member_id = :m AND cancelled_at IS NULL) -
             (SELECT COALESCE(SUM(amount), 0) FROM payments WHERE member_id = :m AND cancelled_at IS NULL)');
         $s->execute(['m' => $memberId]);
         return (int)$s->fetchColumn();
@@ -258,6 +267,10 @@ final class DebtRepository
         $s->execute([$memberId]);
         $rows = $s->fetchAll();
         foreach ($rows as &$d) {
+            if ($d['cancelled_at'] !== null) {
+                $d['paid'] = 0; $d['sisa'] = (int)$d['amount']; $d['status'] = 'dibatalkan';
+                continue;
+            }
             $used = min($pool, (int)$d['amount']);
             $pool -= $used;
             $d['paid'] = $used;
