@@ -23,6 +23,14 @@ if (!isAuthed()) {
     exit;
 }
 
+// Hanya halaman yang terdaftar yang boleh dirender.
+$page = trim((string)($_GET['page'] ?? 'home'));
+$allowedPages = ['home', 'members', 'member', 'debts', 'payments', 'reports'];
+if (!in_array($page, $allowedPages, true)) {
+    $page = 'error';
+    http_response_code(404);
+}
+
 try {
     $pdo = Database::connect($config);
     $repo = new DebtRepository($pdo);
@@ -30,7 +38,6 @@ try {
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') handlePost($repo);
 
-    $page      = $_GET['page'] ?? 'home';
     if ($page === 'reports') go('?', 'Menu Laporan sudah dinonaktifkan.');
     $members   = $repo->members(); // Hanya data ringkas untuk dropdown transaksi.
     $recorders = $repo->recorders();
