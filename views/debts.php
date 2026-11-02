@@ -46,7 +46,7 @@
                         <td class="r"><b><?= rp((int)$r['amount']) ?></b></td>
                         <td class="nowrap mute"><?= tgl($r['created_at']) ?></td>
                         <td><?= $cancelled ? '<span class="badge b-batal">Dibatalkan · ' . tgl($r['cancelled_at']) . '</span>' : '<span class="badge b-lunas">Berlaku</span>' ?><?php if ($cancelled && $r['cancel_reason']): ?><div class="mute"><?= e($r['cancel_reason']) ?></div><?php endif; ?></td>
-                        <td class="r"><?php if (!$cancelled): ?><form method="post"><?php hid('cancel_debt', '?page=debts'); ?><input type="hidden" name="id" value="<?= (int)$r['id'] ?>"><input type="hidden" name="reason"><button class="btn sm danger" onclick="const reason=prompt('Alasan pembatalan hutang:'); if(!reason || !reason.trim()) return false; if(!confirm('Batalkan hutang <?= rp((int)$r['amount']) ?> untuk <?= e($r['member_name']) ?>?')) return false; this.form.reason.value=reason.trim();">Batalkan</button></form><?php endif; ?></td>
+                        <td class="r"><?php if (!$cancelled): ?><form method="post" data-cancel-debt><?php hid('cancel_debt', '?page=debts'); ?><input type="hidden" name="id" value="<?= (int)$r['id'] ?>"><input type="hidden" name="reason"><button type="submit" class="btn sm danger">Batalkan</button></form><?php endif; ?></td>
                     </tr><?php endforeach; ?>
             </tbody>
         </table>
