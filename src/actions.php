@@ -55,6 +55,14 @@ function handlePost(DebtRepository $repo): void
         go($back, 'Pelunasan ' . rp($amount) . ' berhasil dicatat.');
     }
 
+    if ($act === 'cancel_debt') {
+        $id = (int)($_POST['id'] ?? 0);
+        $reason = trim((string)($_POST['reason'] ?? ''));
+        if ($id <= 0 || $reason === '') go($back, 'ID hutang dan alasan pembatalan wajib diisi.', 'err');
+        if (!$repo->cancelDebt($id, $reason)) go($back, 'Hutang tidak ditemukan atau sudah dibatalkan.', 'err');
+        go($back, 'Data hutang berhasil dibatalkan. Saldo member dihitung ulang.');
+    }
+
     if ($act === 'cancel_payment') {
         $repo->cancelPayment((int)($_POST['id'] ?? 0));
         go($back, 'Pelunasan dibatalkan. Status hutang dihitung ulang.');
