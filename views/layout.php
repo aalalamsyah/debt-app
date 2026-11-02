@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
-    <title><?= $page === 'member' ? e($member['name']) . ' · ' : '' ?>Buku Hutang</title>
+    <title><?= $page === 'error' ? 'Halaman tidak ditemukan · ' : ($page === 'member' ? e($member['name']) . ' · ' : '') ?>Buku Hutang</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -59,7 +59,7 @@
                 <div class="topbar-left"><button class="icon-button menu-toggle" id="menuToggle" aria-label="Buka navigasi" aria-expanded="false"><svg viewBox="0 0 24 24">
                             <path d="M4 6h16M4 12h16M4 18h16" />
                         </svg></button>
-                    <div class="breadcrumb"><span>Workspace</span><b>/</b><strong><?= $page === 'members' ? 'Data Member' : ($page === 'member' ? 'Detail Member' : ($page === 'debts' ? 'Data Hutang' : ($page === 'payments' ? 'Data Pembayaran' : ($page === 'reports' ? 'Laporan' : 'Dashboard')))) ?></strong></div>
+                    <div class="breadcrumb"><span>Workspace</span><b>/</b><strong><?= $page === 'error' ? 'Halaman tidak ditemukan' : ($page === 'members' ? 'Data Member' : ($page === 'member' ? 'Detail Member' : ($page === 'debts' ? 'Data Hutang' : ($page === 'payments' ? 'Data Pembayaran' : ($page === 'reports' ? 'Laporan' : 'Dashboard'))))) ?></strong></div>
                 </div>
                 <div class="topbar-actions"><span class="topbar-date"><?= e(hariTanggal(date('Y-m-d'))) ?></span><button class="icon-button" id="themeToggle" type="button" aria-label="Ganti tema" title="Ganti tema"><svg class="sun-icon" viewBox="0 0 24 24">
                             <circle cx="12" cy="12" r="4" />
@@ -70,7 +70,7 @@
                     <div class="user-chip"><span class="avatar">A</span><span class="user-label">Admin</span></div>
                 </div>
             </header>
-            <main class="content"><?php if ($flash): ?><div class="toast-notice <?= $flash[0] === 'err' ? 'error' : 'success' ?>" role="status"><span class="toast-mark"><?= $flash[0] === 'err' ? '!' : '✓' ?></span><span><?= e($flash[1]) ?></span><button type="button" class="toast-close" aria-label="Tutup notifikasi">×</button></div><?php endif; ?><?php require BASE_PATH . '/views/' . (in_array($page, ['members', 'member', 'debts', 'payments', 'reports'], true) ? $page : 'home') . '.php'; ?></main>
+            <main class="content"><?php if ($flash): ?><div class="toast-notice <?= $flash[0] === 'err' ? 'error' : 'success' ?>" role="status"><span class="toast-mark"><?= $flash[0] === 'err' ? '!' : '✓' ?></span><span><?= e($flash[1]) ?></span><button type="button" class="toast-close" aria-label="Tutup notifikasi">×</button></div><?php endif; ?><?php require BASE_PATH . '/views/' . ($page === 'error' ? 'error' : (in_array($page, ['members', 'member', 'debts', 'payments', 'reports'], true) ? $page : 'home')) . '.php'; ?></main>
             <footer class="app-footer"><span>Buku Hutang</span><span>Manajemen hutang sederhana</span></footer>
         </div>
     </div>
