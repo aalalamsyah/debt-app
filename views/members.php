@@ -21,7 +21,7 @@
   <div class="tablebox"><table><thead><tr><th>Nama member</th><th>Nomor HP</th><th class="r">Sisa hutang</th><th class="r">Pengaturan</th></tr></thead><tbody>
   <?php foreach ($memberSettingsRows as $m): $balance = (int)$m['total_debt'] - (int)$m['total_paid']; ?>
     <tr>
-      <td><strong><?= e($m['name']) ?></strong></td>
+      <td><a class="name member-name-link" href="?page=member&id=<?= (int)$m['id'] ?>" title="Lihat detail hutang <?= e($m['name']) ?>"><strong><?= e($m['name']) ?></strong></a></td>
       <td><?= $m['phone'] ? e($m['phone']) : '<span class="mute">Belum diisi</span>' ?></td>
       <td class="r <?= $balance > 0 ? 'bad' : 'good' ?>"><?= $balance > 0 ? rp($balance) : 'Lunas' ?></td>
       <td class="r"><button type="button" class="btn sm" onclick="openEditMember(<?= (int)$m['id'] ?>, <?= htmlspecialchars(json_encode($m['name'], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8') ?>, <?= htmlspecialchars(json_encode((string)($m['phone'] ?? ''), JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8') ?>)">Edit</button></td>
