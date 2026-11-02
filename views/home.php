@@ -43,8 +43,8 @@
   <section class="card">
     <div class="bar"><div><h2>Aktivitas terbaru</h2><small class="card-caption">8 transaksi terakhir</small></div></div>
     <?php if ($recentActivities): ?><div class="activity-list">
-      <?php foreach ($recentActivities as $a): $isPayment = $a['kind'] === 'payment'; $isCancelled = $isPayment && $a['cancelled_at'] !== null; ?>
-        <div class="activity-item"><span class="activity-icon <?= $isPayment ? 'payment' : 'debt' ?>"><?= $isPayment ? '↓' : '+' ?></span><div class="activity-copy"><strong><?= e($a['member_name']) ?></strong><span><?= $isCancelled ? 'Pembayaran dibatalkan' : ($isPayment ? 'Pembayaran diterima' : 'Hutang dicatat') ?> · <?= e($a['recorded_by']) ?></span><small><?= e(hariTanggal($a['happened_at'], true)) ?></small></div><b class="activity-amount <?= $isPayment && !$isCancelled ? 'good' : ($isCancelled ? 'mute' : 'bad') ?>"><?= $isPayment ? '− ' : '+ ' ?><?= rp((int)$a['amount']) ?></b></div>
+      <?php foreach ($recentActivities as $a): $isPayment = $a['kind'] === 'payment'; $isCancelled = $a['cancelled_at'] !== null; ?>
+        <div class="activity-item"><span class="activity-icon <?= $isPayment ? 'payment' : 'debt' ?>"><?= $isPayment ? '↓' : '+' ?></span><div class="activity-copy"><strong><?= e($a['member_name']) ?></strong><span><?= $isCancelled ? ($isPayment ? 'Pembayaran dibatalkan' : 'Hutang dibatalkan') : ($isPayment ? 'Pembayaran diterima' : 'Hutang dicatat') ?> · <?= e($a['recorded_by']) ?></span><small><?= e(hariTanggal($a['happened_at'], true)) ?></small></div><b class="activity-amount <?= $isPayment && !$isCancelled ? 'good' : ($isCancelled ? 'mute' : 'bad') ?>"><?= $isCancelled ? '' : ($isPayment ? '− ' : '+ ') ?><?= rp((int)$a['amount']) ?></b></div>
       <?php endforeach; ?>
     </div><?php else: ?><div class="empty">Belum ada aktivitas transaksi.</div><?php endif; ?>
   </section>
