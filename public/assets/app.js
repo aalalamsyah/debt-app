@@ -35,3 +35,85 @@ function openEditMember(id, name, phone) {
   dialog.showModal();
   document.getElementById('editMemberName').focus();
 }
+
+
+// Custom application dialogs: no native prompt()/confirm() popups.
+(function () {
+  const dialog = document.getElementById('appActionDialog');
+  if (!dialog) return;
+  const title = document.getElementById('appActionTitle');
+  const message = document.getElementById('appActionMessage');
+  const reason = document.getElementById('appActionReason');
+  const reasonLabel = document.getElementById('appActionReasonLabel');
+  const confirmButton = document.getElementById('appActionConfirm');
+  const cancelButton = document.getElementById('appActionCancel');
+  let onConfirm = null;
+
+  function openDialog(options) {
+    title.textContent = options.title || 'Konfirmasi tindakan';
+    message.textContent = options.message || '';
+    reason.hidden = !options.requireReason;
+    reasonLabel.hidden = !options.requireReason;
+    reason.value = '';
+    confirmButton.textContent = options.confirmText || 'Lanjutkan';
+    confirmButton.classList.toggle('danger-action', !!options.danger);
+    onConfirm = options.onConfirm;
+    dialog.showModal();
+    if (options.requireReason) reason.focus();
+    else cancelButton.focus();
+  }
+
+  cancelButton.addEventListener('click', () => dialog.close());
+  confirmButton.addEventListener('click', () => {
+    if (reason.hidden === false && !reason.value.trim()) {
+      reason.setCustomValidity('Alasan pembatalan wajib diisi.');
+      reason.reportValidity();
+      reason.addEventListener('input', () => reason.setCustomValidity(''), { once: true });
+      return;
+    }
+    const action = onConfirm;
+    dialog.close();
+    if (typeof action === 'function') action(reason.value.trim());
+  });
+
+  document.addEventListener('submit', event => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement)) return;
+    if (form.hasAttribute('data-cancel-debt')) {
+      event.preventDefault();
+      openDialog({
+        title: 'Batalkan hutang',
+        message: 'Transaksi ini akan ditandai sebagai dibatalkan dan tidak lagi dihitung dalam saldo. Tuliskan alasan pembatalan untuk melanjutkan.',
+        requireReason: true,
+        confirmText: 'Batalkan hutang',
+        danger: true,
+        onConfirm: value => {
+          const field = form.querySelector('input[name="reason"]');
+          if (field) field.value = value;
+          form.submit();
+        }
+      });
+      return;
+    }
+    if (form.hasAttribute('data-confirm')) {
+      event.preventDefault();
+      openDialog({
+        title: 'Konfirmasi pembatalan',
+        message: form.getAttribute('data-confirm'),
+        confirmText: 'Ya, batalkan',
+        danger: true,
+        onConfirm: () => form.submit()
+      });
+    }
+  });
+
+  const toast = document.querySelector('.toast-notice');
+  if (toast) {
+    const dismiss = () => {
+      toast.classList.add('toast-hide');
+      window.setTimeout(() => toast.remove(), 220);
+    };
+    toast.querySelector('.toast-close')?.addEventListener('click', dismiss);
+    window.setTimeout(dismiss, 4800);
+  }
+})();
