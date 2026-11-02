@@ -30,3 +30,29 @@ input,select,textarea{width:100%;min-height:39px;padding:9px 11px;border:1px sol
 /* Stage 6: report methodology note */
 .report-note { margin-top: 16px; }
 .report-note p { color: var(--muted, #64748b); margin: 8px 0 0; line-height: 1.6; }
+
+
+/* Modern action dialogs and toast notifications */
+.app-action-dialog{width:min(460px,calc(100vw - 30px));padding:0;border:1px solid var(--line);border-radius:18px;background:var(--surface);color:var(--ink);box-shadow:0 28px 90px #02061755;opacity:0;transform:translateY(10px) scale(.98);transition:opacity .18s ease,transform .18s ease}
+.app-action-dialog[open]{opacity:1;transform:translateY(0) scale(1)}
+.app-action-dialog::backdrop{background:rgba(15,23,42,.58);backdrop-filter:blur(4px)}
+.app-action-form{padding:26px}
+.app-dialog-icon{width:42px;height:42px;display:grid;place-items:center;margin-bottom:15px;border-radius:13px;background:var(--badbg);color:var(--bad);font-size:20px;font-weight:800}
+.app-action-form h3{margin:0 0 7px;font-size:18px;letter-spacing:-.35px}
+.app-dialog-message{margin:0 0 17px;color:var(--mute);font-size:13px;line-height:1.65}
+.app-action-form label{margin:0 0 7px;font-size:12px}
+.app-action-form textarea{min-height:88px;resize:vertical}
+.app-action-form .foot{margin-top:22px}
+.app-action-form .danger-action{border-color:var(--bad);background:var(--bad);color:#fff}
+.app-action-form .danger-action:hover{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 85%,#000);color:#fff}
+.toast-notice{position:fixed;top:82px;right:24px;z-index:80;display:flex;align-items:center;gap:11px;width:min(390px,calc(100vw - 30px));padding:13px 14px;border:1px solid var(--line);border-radius:13px;background:var(--surface);box-shadow:0 14px 40px #02061724;color:var(--ink);font-size:12px;font-weight:600;animation:toast-in .22s ease both}
+.toast-notice.success .toast-mark{background:var(--okbg);color:var(--ok)}
+.toast-notice.error .toast-mark{background:var(--badbg);color:var(--bad)}
+.toast-mark{width:27px;height:27px;display:grid;place-items:center;flex:0 0 auto;border-radius:50%;font-size:13px;font-weight:800}
+.toast-notice>span:nth-child(2){flex:1}
+.toast-close{width:27px;height:27px;border:0;border-radius:7px;background:transparent;color:var(--mute);font-size:20px;cursor:pointer}
+.toast-close:hover{background:var(--surface-hover);color:var(--ink)}
+.toast-hide{opacity:0;transform:translateY(-7px);transition:opacity .2s,transform .2s}
+@keyframes toast-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.app-action-form{padding:22px}.toast-notice{top:70px;right:15px}}
+@media(prefers-reduced-motion:reduce){.app-action-dialog,.toast-notice{animation:none;transition:none}}
