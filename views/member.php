@@ -21,7 +21,7 @@ $badge['dibatalkan'] = 'Dibatalkan'; ?>
     <div class="tablebox"><table>
       <thead><tr><th>Tanggal</th><th class="r">Jumlah catatan</th><th class="r">Total hutang</th><th class="r">Terbayar</th><th class="r">Sisa</th><th>Status</th></tr></thead>
       <tbody>
-      <?php foreach (groupDebtsByDate($debts) as $g): ?>
+      <?php foreach ($memberDateRows as $g): ?>
         <tr>
           <td class="nowrap"><b><?= tglDate($g['date']) ?></b></td>
           <td class="r"><?= $g['count'] ?>x</td>
@@ -33,7 +33,8 @@ $badge['dibatalkan'] = 'Dibatalkan'; ?>
       <?php endforeach; ?>
       </tbody>
     </table></div>
-    <?php if (!$debts): ?><div class="empty">Belum ada hutang tercatat untuk member ini.</div><?php endif; ?>
+    <?php if (!$memberDateRows): ?><div class="empty">Belum ada hutang tercatat untuk member ini.</div><?php endif; ?>
+    <?php $memberPager = $memberDatePagination; $memberPagerKey = 'date_page'; require BASE_PATH . '/views/member-pagination.php'; ?>
   </div>
 
   <div class="card">
@@ -41,7 +42,7 @@ $badge['dibatalkan'] = 'Dibatalkan'; ?>
     <div class="tablebox"><table>
       <thead><tr><th>Tanggal</th><th>Keterangan</th><th>Pencatat</th><th class="r">Hutang</th><th class="r">Terbayar</th><th class="r">Sisa</th><th>Status</th><th></th></tr></thead>
       <tbody>
-      <?php foreach ($debts as $d): $cancelledDebt = $d['cancelled_at'] !== null; ?>
+      <?php foreach ($memberDebtRows as $d): $cancelledDebt = $d['cancelled_at'] !== null; ?>
         <tr class="<?= $cancelledDebt ? 'cancelled' : '' ?>">
           <td class="nowrap"><?= tglDate($d['debt_date']) ?></td>
           <td><?= $d['note'] ? e($d['note']) : '<span class="mute">-</span>' ?></td>
@@ -55,7 +56,8 @@ $badge['dibatalkan'] = 'Dibatalkan'; ?>
       <?php endforeach; ?>
       </tbody>
     </table></div>
-    <?php if (!$debts): ?><div class="empty">Belum ada hutang tercatat untuk member ini.</div><?php endif; ?>
+    <?php if (!$memberDebtRows): ?><div class="empty">Belum ada hutang tercatat untuk member ini.</div><?php endif; ?>
+    <?php $memberPager = $memberDebtPagination; $memberPagerKey = 'debt_page'; require BASE_PATH . '/views/member-pagination.php'; ?>
   </div>
 
   <div class="card">
