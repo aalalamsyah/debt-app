@@ -149,11 +149,35 @@ try {
         $memberSettingsRows = $repo->exportMembers($memberSearch, 'all', 'name', 'asc');
     }
 
+    $memberDateRows = $memberDebtRows = [];
+    $memberDatePagination = ['page'=>1,'per_page'=>10,'total'=>0,'pages'=>1];
+    $memberDebtPagination = ['page'=>1,'per_page'=>10,'total'=>0,'pages'=>1];
     if ($page === 'member') {
         $member = $repo->findMember((int)($_GET['id'] ?? 0));
         if (!$member) go('?', 'Member tidak ditemukan.', 'err');
-        $debts = $repo->debtsWithStatus((int)$member['id']);
-        $pays  = $repo->payments((int)$member['id']);
+
+        // Hitung alokasi FIFO menggunakan seluruh hutang terlebih dahulu.
+        $allMemberDebts = $repo->debtsWithStatus((int)$member['id']);
+        // Setelah status pembayaran dihitung, tampilkan transaksi terbaru lebih dahulu.
+        usort($allMemberDebts, static function(array $a, array $b): int {
+            return [$b['debt_date'], $b['created_at'], (int)$b['id']] <=> [$a['debt_date'], $a['created_at'], (int)$a['id']];
+        });
+        $allMemberDateRows = groupDebtsByDate($allMemberDebts);
+        $pays = $repo->payments((int)$member['id']);
+
+        $perPage = in_array((int)($_GET['detail_per_page'] ?? 10), [10, 25, 50], true) ? (int)($_GET['detail_per_page'] ?? 10) : 10;
+        $dateRequested = max(1, (int)($_GET['date_page'] ?? 1));
+        $datePages = max(1, (int)ceil(count($allMemberDateRows) / $perPage));
+        $dateCurrent = min($dateRequested, $datePages);
+        $memberDateRows = array_slice($allMemberDateRows, ($dateCurrent - 1) * $perPage, $perPage);
+        $memberDatePagination = ['page'=>$dateCurrent,'per_page'=>$perPage,'total'=>count($allMemberDateRows),'pages'=>$datePages];
+
+        $debtRequested = max(1, (int)($_GET['debt_page'] ?? 1));
+        $debtPages = max(1, (int)ceil(count($allMemberDebts) / $perPage));
+        $debtCurrent = min($debtRequested, $debtPages);
+        $memberDebtRows = array_slice($allMemberDebts, ($debtCurrent - 1) * $perPage, $perPage);
+        $memberDebtPagination = ['page'=>$debtCurrent,'per_page'=>$perPage,'total'=>count($allMemberDebts),'pages'=>$debtPages];
+        $debts = $allMemberDebts;
     }
 } catch (PDOException $ex) {
     http_response_code(500);
